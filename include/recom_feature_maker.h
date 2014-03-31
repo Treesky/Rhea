@@ -50,9 +50,10 @@ public:
                      std::vector< SparseAtom<double> > &features)
     {
         SparseAtom<double> feature;
-        uint64_t sign = sign_str(recom_info.user_id);
-        sign = prefix | sign_64_48(sign);
-        uint32_t fea_idx = get_fea_idx(sign);
+        uint32_t sign = sign_str(recom_info.user_id);
+        sign = prefix | sign_32_24(sign);
+        Sign2FeatureID * p_ins = Sign2FeatureID::get_instance(); 
+        uint32_t fea_idx = p_ins->get_fea_idx(sign);
         feature.idx = fea_idx;
         feature.value = 1;
         features.push_back(feature);
@@ -67,8 +68,8 @@ public:
                      std::vector< SparseAtom<double> > &features)
     {
         SparseAtom<double> feature;
-        uint64_t sign = sign_str(recom_info.user_id);
-        sign = prefix | sign_64_48(sign);
+        uint32_t sign = sign_str(recom_info.user_id);
+        sign = prefix | sign_32_24(sign);
         uint32_t fea_idx = get_fea_idx(sign);
         feature.idx = fea_idx;
         feature.value = 1;

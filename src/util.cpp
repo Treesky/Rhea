@@ -1,16 +1,30 @@
 #include "util.h"
 
-uint64_t sign_str(std::string line)
+uint32_t sign_str(std::string line)
 {
-    return 0L;
+    // Donald E. Knuth: The Art of Computer Programming, volumes 3
+    size_t h = line.size();
+    for (size_t i = 0; i < line.size(); ++i )
+    {
+        h = ((h << 5) ^ (h >> 27)) ^ line[i];
+    }
+    return h;
 }
 
-uint64_t sign_64_48(uint64_t sign)
+uint32_t sign_32_24(uint32_t sign)
 {
-    return 0L;
+    static const uint32_t MASK24 = ((uint32_t) 1 << 24) - 1;
+    uint32_t sign3 = sign >> 24 & 0xFF;
+    sign = sign & MASK24;
+    sign ^= sign3;
+    sign ^= sign3 << 4;
+    sign ^= sign3 << 8;
+    sign ^= sign3 << 12;
+    sign ^= sign3 << 16;
+    return sign;
 }
 
-uint32_t get_fea_idx(uint64_t sign)
+uint32_t get_fea_idx(uint32_t sign)
 {
     return 0;
 }
@@ -46,3 +60,9 @@ double ran_gaussian(double mean, double stdev)
     }
 }
 
+namespace Rhea
+{
+
+Sign2FeatureID * Sign2FeatureID::_p_ins = NULL;
+
+}
