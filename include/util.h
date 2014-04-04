@@ -2,6 +2,7 @@
 #define _UTIL_
 
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <ext/hash_map>
 
@@ -53,12 +54,20 @@ namespace Rhea
 class Sign2FeatureID
 {
 private:
-    /*
     __gnu_cxx::hash_map<uint32_t, uint32_t> _sign_dict;
     uint32_t _local_id;
-    */
-    Sign2FeatureID() { }
-    /*
+    Sign2FeatureID() { _local_id = 0; }
+
+    ~Sign2FeatureID() 
+    {
+        std::ofstream fout("./feasign2id.data");
+        __gnu_cxx::hash_map<uint32_t, uint32_t>::iterator iter = _sign_dict.begin();
+        for (iter == _sign_dict.begin(); iter != _sign_dict.end(); ++iter)
+        {
+            fout << (iter->first) << "\t" << (iter->second) << std::endl;
+        }
+        fout.close();
+    }
     class CGabor
     {
         public:
@@ -68,15 +77,11 @@ private:
             }
     };
     static CGabor _cgabor;
-    */
     static Sign2FeatureID *_p_ins;
 
 public:
     static Sign2FeatureID * get_instance()
     {
-        _p_ins = NULL;
-            //new (std::nothrow) Sign2FeatureID();
-        /*
         if (NULL == _p_ins)
         {
             _p_ins = new (std::nothrow) Sign2FeatureID();
@@ -86,13 +91,10 @@ public:
             }
         }
         return _p_ins;
-        */
-        return _p_ins;
     }
 
     uint32_t get_fea_idx(uint32_t sign)
     {
-        /*
         if (_sign_dict.find(sign) == _sign_dict.end())
         {
             std::pair<uint32_t, uint32_t> p(sign, _local_id);
@@ -104,7 +106,6 @@ public:
         {
             return _sign_dict[sign];
         }
-        */
         return 0;
     }
 };

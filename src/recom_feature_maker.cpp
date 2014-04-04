@@ -70,9 +70,8 @@ int main(int argc, char ** argv)
             }
         }
         ++ fea_idx;
-        fea_sig_val = fea_sig_val > 1;
+        fea_sig_val = fea_sig_val >> 1;
     }
-    feature_makers.push_back(new Rhea::UserIDFeature);
 
     // 每一行构建一个 RecomInfo 对象
     std::ifstream src_data_in(src_data_filepath.c_str());
