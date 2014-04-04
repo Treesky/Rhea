@@ -24,11 +24,6 @@ uint32_t sign_32_24(uint32_t sign)
     return sign;
 }
 
-uint32_t get_fea_idx(uint32_t sign)
-{
-    return 0;
-}
-
 double ran_uniform()
 {
     return rand()/((double)RAND_MAX + 1);
@@ -64,5 +59,6 @@ namespace Rhea
 {
 
 Sign2FeatureID * Sign2FeatureID::_p_ins = NULL;
+Sign2FeatureID::CGabor Sign2FeatureID::_cgabor;
 
 }

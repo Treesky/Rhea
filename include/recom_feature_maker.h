@@ -29,7 +29,7 @@ class Feature
 protected:
     char sign_buff[SIGN_BUFF_LEN];
     uint32_t buff_len;
-    uint64_t prefix;
+    uint32_t prefix;
 public:
     Feature()
     {
@@ -45,6 +45,10 @@ public:
 class UserIDFeature : public Feature
 {
 public:
+    UserIDFeature()
+    {
+        prefix = 1 << 24;
+    }
 
     int make_feature(RecomInfo &recom_info, 
                      std::vector< SparseAtom<double> > &features)
@@ -52,8 +56,7 @@ public:
         SparseAtom<double> feature;
         uint32_t sign = sign_str(recom_info.user_id);
         sign = prefix | sign_32_24(sign);
-        Sign2FeatureID * p_ins = Sign2FeatureID::get_instance(); 
-        uint32_t fea_idx = p_ins->get_fea_idx(sign);
+        uint32_t fea_idx = Sign2FeatureID::get_instance()->get_fea_idx(sign);
         feature.idx = fea_idx;
         feature.value = 1;
         features.push_back(feature);
@@ -64,13 +67,19 @@ public:
 class ItemIDFeature : public Feature
 {
 public:
+
+    ItemIDFeature()
+    {
+        prefix = 2 << 24;
+    }
+
     int make_feature(RecomInfo &recom_info,
                      std::vector< SparseAtom<double> > &features)
     {
         SparseAtom<double> feature;
         uint32_t sign = sign_str(recom_info.user_id);
         sign = prefix | sign_32_24(sign);
-        uint32_t fea_idx = get_fea_idx(sign);
+        uint32_t fea_idx = Sign2FeatureID::get_instance()->get_fea_idx(sign);
         feature.idx = fea_idx;
         feature.value = 1;
         features.push_back(feature);
@@ -81,8 +90,13 @@ public:
 class ItemIDFFeature : public Feature
 {
 private:
-    __gnu_cxx::hash_map<uint32_t, std::vector<uint32_t> * > id_size;
+    __gnu_cxx::hash_map<uint32_t, std::vector<std::string> * > id_size;
 public:
+    ItemIDFFeature()
+    {
+        prefix = 3 << 24;
+    }
+
     ItemIDFFeature(std::string filename)
     {
         std::ifstream fin(filename.c_str());
@@ -93,21 +107,20 @@ public:
         }
 
         std::string idf_line, token;
-        uint32_t id = 0;
+        uint32_t user_id = 0;
         while ( getline(fin, idf_line) )
         {
             std::stringstream stringsplitter(idf_line);
 
-            getline(stringsplitter, token, '\t');
-            sscanf(token.c_str(), "%u", &id);
-            std::pair<uint32_t, std::vector<uint32_t> * > pp;
-            pp.second = new std::vector<uint32_t>();
+            std::pair<uint32_t, std::vector<std::string> * > pp;
+            getline(stringsplitter, token, ' ');
+            user_id = sign_str(token);
+            pp.first = user_id;
+            pp.second = new std::vector<std::string>();
             id_size.insert(pp);
-            pp.first = id;
-            while ( getline(stringsplitter, token, '\t') )
+            while ( getline(stringsplitter, token, ' ') )
             {
-                sscanf(token.c_str(), "%u", &id);
-                pp.second->push_back(id);
+                pp.second->push_back(token);
             }
         }
         std::cout << "load ItemIDFFeature file success!" << std::endl;
@@ -118,17 +131,17 @@ public:
     int make_feature(RecomInfo &recom_info,
                      std::vector< SparseAtom<double> > &features)
     {
-        uint32_t user_id = 0;
-        sscanf(recom_info.user_id.c_str(), "%u", &user_id);
+        uint32_t user_id = sign_str(recom_info.user_id);
         if (id_size.find(user_id) != id_size.end())
         {
-            std::vector<uint32_t> * vec = id_size[user_id];
+            std::vector<std::string> * vec = id_size[user_id];
             for (uint32_t i = 0; i < vec->size(); ++i )
             {
                 SparseAtom<double> atom;
-                uint64_t item_id = (*vec)[i];
-                atom.value = (double)( item_id ) / vec->size();
-                atom.idx = get_fea_idx(prefix | item_id);
+                std::string item_id = (*vec)[i];
+                atom.value = 1.0 / vec->size();
+                atom.idx = Sign2FeatureID::get_instance()->get_fea_idx(prefix | sign_32_24( sign_str(item_id)) );
+                features.push_back(atom);
             }
         }
         return 0;
@@ -136,7 +149,7 @@ public:
 
     ~ItemIDFFeature()
     {
-        __gnu_cxx::hash_map<uint32_t, std::vector<uint32_t> * >::iterator iter;
+        __gnu_cxx::hash_map<uint32_t, std::vector<std::string> * >::iterator iter;
         for (iter = id_size.begin(); iter != id_size.end(); ++iter )
         {
             DEL_POINTER(iter->second);
@@ -146,6 +159,12 @@ public:
 
 class WeekdayFeature : public Feature
 {
+public:
+    WeekdayFeature()
+    {
+        prefix = 4 << 24;
+    }
+
     int make_feature(RecomInfo &recom_info,
                      std::vector< SparseAtom<double> > &features)
     {
@@ -154,16 +173,23 @@ class WeekdayFeature : public Feature
         struct timeval tv = {time_stamp, 0};
         struct tm time;
         localtime_r(&tv.tv_sec, &time);
-        uint32_t fea_id = get_fea_idx(prefix | time.tm_wday);
+        uint32_t fea_id = Sign2FeatureID::get_instance()->get_fea_idx(prefix | time.tm_wday);
         SparseAtom<double> atom;
         atom.idx = fea_id;
         atom.value = 1;
+        features.push_back(atom);
         return 0;
     }
 };
 
 class HourFeature : public Feature
 {
+public:
+    HourFeature()
+    {
+        prefix = 5 << 24;
+    }
+
     int make_feature(RecomInfo &recom_info,
                      std::vector< SparseAtom<double> > &features)
     {
@@ -172,16 +198,23 @@ class HourFeature : public Feature
         struct timeval tv = {time_stamp, 0};
         struct tm time;
         localtime_r(&tv.tv_sec, &time);
-        uint32_t fea_id = get_fea_idx(prefix | time.tm_hour);
+        uint32_t fea_id = Sign2FeatureID::get_instance()->get_fea_idx(prefix | time.tm_hour);
         SparseAtom<double> atom;
         atom.idx = fea_id;
         atom.value = 1;
+        features.push_back(atom);
         return 0;
     }
 };
 
 class DayFeature : public Feature
 {
+public:
+    DayFeature()
+    {
+        prefix = 6 << 24;
+    }
+
     int make_feature(RecomInfo &recom_info,
                      std::vector< SparseAtom<double> > &features)
     {
@@ -190,10 +223,11 @@ class DayFeature : public Feature
         struct timeval tv = {time_stamp, 0};
         struct tm time;
         localtime_r(&tv.tv_sec, &time);
-        uint32_t fea_id = get_fea_idx(prefix | time.tm_mday);
+        uint32_t fea_id = Sign2FeatureID::get_instance()->get_fea_idx(prefix | time.tm_mday);
         SparseAtom<double> atom;
         atom.idx = fea_id;
         atom.value = 1;
+        features.push_back(atom);
         return 0;
     }
 };

@@ -17,14 +17,20 @@ struct SparseAtom
 };
 
 template <class T>
-class SparseVec
+class Vec
+{
+};
+
+
+template <class T>
+class SparseVec : public Vec<T>
 {
 private:
     SparseAtom<T> * _atoms;
     uint32_t _length;
 
 public:
-    SparseVec() : _atoms(NULL), _length(0) {}
+    SparseVec() : _atoms(NULL), _length(0) { }
 
     uint32_t length() { return _length;}
     int set_length(const uint32_t &length) { _length = length; return 0;}
@@ -68,6 +74,9 @@ public:
     int set_rows(uint32_t rows) { _rows = rows; return 0; }
     int set_size(uint32_t rows);
 
+    // NOTICE: the Inverse of SparseMatrix may be not SPARSE, so be careful
+    int inverse(SparseMatrix &inver);
+
     SparseVec<T>& operator[] (uint32_t i)
     {
         if (i >= 0 && i < _rows)
@@ -82,9 +91,8 @@ public:
     }
 };
 
-
 template <class T>
-class DenseVec
+class DenseVec : public Vec<T>
 {
 private:
     T * _atoms;
@@ -210,25 +218,27 @@ public:
 
 };
 
+template<class T>
 class Data
 {
-};
-
-class SparseDataBase : public Data
-{
-};
-
-class DenseDataBase : public Data
-{
+public:
+    virtual Vec<T>& get_ins(uint32_t) = 0;
+    virtual uint32_t instance_num() = 0;
+    virtual int get_label(uint32_t) = 0;
+    virtual ~Data() {};
 };
 
 template<class T>
-class SparseData : public SparseDataBase
+class SparseData : public Data<T>
 {
+    virtual Vec<T>& get_ins(uint32_t) = 0;
+    virtual uint32_t instance_num() = 0;
+    virtual int get_label(uint32_t) = 0;
+    virtual ~SparseData() {};
 };
 
 template<>
-class SparseData<double> : public SparseDataBase
+class SparseData<double> : public Data<double> 
 {
 public:
     SparseMatrix<double> _matrix;
@@ -237,12 +247,14 @@ public:
     void load_from_txt(std::string filename);
     void output();
 
+    virtual ~SparseData() {}
+
     SparseVec<double>& operator[] (uint32_t i)
     {
         return _matrix[i];
     }
 
-    SparseVec<double>& get_ins(uint32_t i)
+    virtual Vec<double>& get_ins(uint32_t i)
     {
         return _matrix[i];
     }
@@ -264,22 +276,22 @@ public:
 };
 
 template<>
-class SparseData<int> : public SparseDataBase
+class SparseData<int> : public Data<int>
 {
 };
 
 template<class T>
-class DenseData : public DenseDataBase
+class DenseData : public Data<T>
 {
 };
 
 template<>
-class DenseData<double> : public DenseDataBase
+class DenseData<double> : public Data<double>
 {
 };
 
 template<>
-class DenseData<int> : public DenseDataBase
+class DenseData<int> : public Data<int>
 {
 };
 
