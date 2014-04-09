@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:31
+ * @file util.cpp
+ * @description 
+ */
+
 #include "util.h"
 
 uint32_t sign_str(std::string line)

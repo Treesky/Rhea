@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:06
+ * @file evaluator.h
+ * @description Evaluation for Algorithm Model; AUC, margin-AUC, MSE 
+ */
+
 #ifndef _EVALUATOR_
 #define _EVALUATOR_
 

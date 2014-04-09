@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:30
+ * @file algorithm.cpp
+ * @description 
+ */
+
 #include "algorithm.h"
 
 namespace Rhea

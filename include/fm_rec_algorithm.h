@@ -1,3 +1,11 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:07
+ * @file fm_rec_algorithm.h
+ * @description Recomendation Algorithm FM Model
+ * Steffen Rendle (2010): Factorization Machines, in Proceedings of the 10th IEEE International Conference on Data Mining (ICDM 2010), Sydney, Australia. 
+ */
+
 #ifndef _FM_REC_ALGORITHM_
 #define _FM_REC_ALGORITHM_
 

@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:30
+ * @file util.h
+ * @description Utility functions for the whoe RHEA project 
+ */
+
 #ifndef _UTIL_
 #define _UTIL_
 

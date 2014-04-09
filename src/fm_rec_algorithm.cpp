@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:31
+ * @file fm_rec_algorithm.cpp
+ * @description 
+ */
+
 #include "fm_rec_algorithm.h"
 
 namespace Rhea

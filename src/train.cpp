@@ -1,6 +1,14 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:31
+ * @file train.cpp
+ * @description 
+ */
+
 #include <iostream>
 
 #include "fm_rec_algorithm.h"
+#include "l1rlr_owlqn_algorithm.h"
 #include "util.h"
 #include "evaluator.h"
 
@@ -13,12 +21,12 @@ void exit_with_help()
     printf("%s\n", "        fm_rec (factor model for recommendation)");
     printf("%s\n", "        afm_rec (auto-regular factor model for recommendation)");
     printf("%s\n", "        l1rlr_owlqn (owlqn for l1-lr)");
-    printf("%s\n", "        l2r_lr_sgd (sgd for l2r-lr)");
+    printf("%s\n", "        l2rlr_sgd (sgd for l2r-lr)");
     printf("%s\n", "        l2r_newton (newton method for l2r-lr)");
-    printf("%s\n", "        l2r_lr_auto-regular-sgd (sgd for l2r-lr)");
+    printf("%s\n", "        l2rlr_auto-regular-sgd (auto regular-sgd for l2r-lr)");
     printf("%s\n", "        l1rlr-cdn (cdn for l1r-lr)");
     printf("%s\n", "        l1rlr-glmnet (glmnet for l1r-lr)");
-    printf("%s\n", "        sgd-auc ( for auc-optim)");
+    printf("%s\n", "        auc-sgd ( for auc-optim)");
 }
 
 int main(int argc, char **argv)
@@ -40,10 +48,24 @@ int main(int argc, char **argv)
         fm_rec_algo.init();
         fm_rec_algo.train();
         fm_rec_algo.save_model("fm_rec.model.out");
-        AucEvaluator eval;
-        std::cout << "AUC Evaluation: " << eval.evaluate(fm_rec_algo, *dt) << std::endl;
-        MaeEvaluator mae;
-        std::cout << "Mae Evaluation: " << mae.evaluate(fm_rec_algo, *dt) << std::endl;
+        AucEvaluator auc_eval;
+        std::cout << "AUC Evaluation: " << auc_eval.evaluate(fm_rec_algo, *dt) << std::endl;
+        MaeEvaluator mae_eval;
+        std::cout << "Mae Evaluation: " << mae_eval.evaluate(fm_rec_algo, *dt) << std::endl;
+    }
+    else if ( 0 == strcmp(prob_type, "l1rlr_owlqn") )
+    {
+        SparseData<double> * dt = new SparseData<double>();
+        dt->load_from_txt("heart_scale");
+        Rhea::L1rlrOwlqnAlgorithm owlqn_algo;
+        owlqn_algo.set_data(dt);
+        owlqn_algo.init();
+        owlqn_algo.train();
+        owlqn_algo.save_model("owlqn.model.out");
+        AucEvaluator auc_eval;
+        std::cout << "AUC Evaluation: " << auc_eval.evaluate(owlqn_algo, *dt) << std::endl;
+        MaeEvaluator mae_eval;
+        std::cout << "Mae Evaluation: " << mae_eval.evaluate(owlqn_algo, *dt) << std::endl;
     }
     else
     {

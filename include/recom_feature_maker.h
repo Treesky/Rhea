@@ -1,3 +1,18 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:27
+ * @file recom_feature_maker.h
+ * @description Extract LIBSVM style features from <user, item, score, time, info1, ... >  
+ * features include:
+ *  user_id
+ *  item_id
+ *  item IDF feature
+ *  weekday 
+ *  hour
+ *  day in month
+ *  info1
+ *  ...
+ */
 #ifndef _RECOM_FEATURE_MAKER_
 #define _RECOM_FEATURE_MAKER_
 

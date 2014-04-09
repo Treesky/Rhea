@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:05
+ * @file data.h
+ * @description Common Data Structure; SparseMatrix; DenseMatrix; SparseVec; DenseVec; SparseAtom 
+ */
+
 #ifndef _DATA_
 #define _DATA_
 
@@ -106,6 +113,11 @@ public:
         DEL_ARRAY_POINTER(_atoms);
     }
 
+    uint32_t length()
+    {
+        return _length;
+    }
+
     T& operator[] (uint32_t i)
     {
         if (i >= 0 && i < _length)
@@ -144,7 +156,61 @@ public:
         return 0;
     }
 
+    T l2_norm()
+    {
+        T value = 0;
+        for (uint32_t i = 0; i < _length; ++i)
+        {
+            value = _atoms[i] * _atoms[i];
+        }
+        return sqrt(value);
+    }
 
+    T l1_norm()
+    {
+        T value = 0;
+        for (uint32_t i = 0; i < _length; ++i)
+        {
+            value += (_atoms[i] > 0 ? _atoms[i] : -_atoms[i]);
+        }
+        return value;
+    }
+
+    T dot_product(DenseVec<T> &oper)
+    {
+        if (_length != oper.length())
+        {
+            std::cout << "Dot product operator should occured between two vector with same dimention!" << std::endl;
+            return 0;
+        }
+        else
+        {
+            T value = 0;
+            for (uint32_t i = 0; i < _length; ++i)
+            {
+                value = oper[i] * _atoms[i];
+            }
+            return value;
+        }
+    }
+
+    int add_vec(DenseVec<T> &oper)
+    {
+        for (uint32_t i = 0; i < _length; ++i)
+        {
+            _atoms[i] += oper[i];
+        }
+        return 0;
+    }
+
+    int scale(const double &oper)
+    {
+        for (uint32_t i = 0; i < _length; ++i )
+        {
+            _atoms[i] *= oper;
+        }
+        return 0;
+    }
 };
 
 template <class T>
@@ -226,6 +292,7 @@ public:
     virtual uint32_t instance_num() = 0;
     virtual int get_label(uint32_t) = 0;
     virtual ~Data() {};
+    virtual uint32_t feature_num() = 0;
 };
 
 template<class T>
@@ -234,6 +301,7 @@ class SparseData : public Data<T>
     virtual Vec<T>& get_ins(uint32_t) = 0;
     virtual uint32_t instance_num() = 0;
     virtual int get_label(uint32_t) = 0;
+    virtual uint32_t feature_num() = 0;
     virtual ~SparseData() {};
 };
 

@@ -1,3 +1,10 @@
+/**
+ * @author: treesky - treesky.cn@gmail.com
+ * @last modified 2014-04-09 17:04
+ * @file algorithm.h
+ * @description: Algorithm Iterface
+ */
+
 #ifndef _ALGORITHM_
 #define _ALGORITHM_
 
