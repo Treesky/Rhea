@@ -28,77 +28,7 @@ class Vec
 {
 };
 
-
-template <class T>
-class SparseVec : public Vec<T>
-{
-private:
-    SparseAtom<T> * _atoms;
-    uint32_t _length;
-
-public:
-    SparseVec() : _atoms(NULL), _length(0) { }
-
-    uint32_t length() { return _length;}
-    int set_length(const uint32_t &length) { _length = length; return 0;}
-    int set_atoms(SparseAtom<T> * atoms) { _atoms = atoms; return 0;}
-    int set_size(uint32_t length);
-    ~SparseVec() {}
-
-    SparseAtom<T>& operator[] (uint32_t i)
-    {
-        if (i >= 0 && i < _length)
-        {
-            return _atoms[i];
-        }
-        else
-        {
-            printf("operator [%u] for SparseVec failed, total size %u\n", i, _length);
-            return _atoms[0];
-        }
-    }
-};
-
-template <class T>
-class SparseMatrix
-{
-private:
-    SparseVec <T> * _vecs;
-    uint32_t _rows;
-    uint32_t _columns;
-
-public:
-    SparseMatrix() : _vecs(NULL), _rows(0), _columns(0) { }
-
-    ~SparseMatrix()
-    {
-        DEL_ARRAY_POINTER(_vecs);
-    }
-
-    uint32_t columns() { return _columns; }
-    int set_columns(uint32_t columns) { _columns = columns; return 0; } 
-    uint32_t rows() {return _rows; }
-    int set_rows(uint32_t rows) { _rows = rows; return 0; }
-    int set_size(uint32_t rows);
-
-    // NOTICE: the Inverse of SparseMatrix may be not SPARSE, so be careful
-    int inverse(SparseMatrix &inver);
-
-    SparseVec<T>& operator[] (uint32_t i)
-    {
-        if (i >= 0 && i < _rows)
-        {
-            return _vecs[i];
-        }
-        else
-        {
-            printf("operator [%u] for SparseMatrix failed, total size %u\n", i, _rows);
-            return _vecs[0];
-        }
-    }
-};
-
-template <class T>
+template<class T>
 class DenseVec : public Vec<T>
 {
 private:
@@ -161,7 +91,7 @@ public:
         T value = 0;
         for (uint32_t i = 0; i < _length; ++i)
         {
-            value = _atoms[i] * _atoms[i];
+            value += _atoms[i] * _atoms[i];
         }
         return sqrt(value);
     }
@@ -180,15 +110,16 @@ public:
     {
         if (_length != oper.length())
         {
-            std::cout << "Dot product operator should occured between two vector with same dimention!" << std::endl;
+            std::cout << "Dot product operator should occured between two vector with same dimention! [" << _length <<
+               "] * [" << oper.length() << "]"  << std::endl;
             return 0;
         }
         else
         {
             T value = 0;
-            for (uint32_t i = 0; i < _length; ++i)
+            for (uint32_t i = 0; i < oper.length(); ++i)
             {
-                value = oper[i] * _atoms[i];
+                value += _atoms[i] * oper[i];
             }
             return value;
         }
@@ -203,6 +134,15 @@ public:
         return 0;
     }
 
+    int add_mult(DenseVec<T> &oper_vec, double scalar)
+    {
+        for (uint32_t i = 0; i < _length; ++i)
+        {
+            _atoms[i] += (oper_vec[i] * scalar);
+        }
+        return 0;
+    }
+
     int scale(const double &oper)
     {
         for (uint32_t i = 0; i < _length; ++i )
@@ -210,6 +150,110 @@ public:
             _atoms[i] *= oper;
         }
         return 0;
+    }
+};
+
+
+
+template <class T>
+class SparseVec : public Vec<T>
+{
+private:
+    SparseAtom<T> * _atoms;
+    uint32_t _length;
+
+public:
+    SparseVec() : _atoms(NULL), _length(0) { }
+
+    uint32_t length() { return _length;}
+    int set_length(const uint32_t &length) { _length = length; return 0;}
+    int set_atoms(SparseAtom<T> * atoms) { _atoms = atoms; return 0;}
+    int set_size(uint32_t length);
+    ~SparseVec() {}
+
+    SparseAtom<T>& operator[] (uint32_t i)
+    {
+        if (i >= 0 && i < _length)
+        {
+            return _atoms[i];
+        }
+        else
+        {
+            printf("operator [%u] for SparseVec failed, total size %u\n", i, _length);
+            return _atoms[0];
+        }
+    }
+
+    double dot_product(DenseVec<double> &instance)
+    {
+        double value = 0.0;
+        for (uint32_t i = 0; i < _length; ++i)
+        {
+            value += instance[_atoms[i].idx] * _atoms[i].value;
+        }
+        return value;
+    }
+
+    double dot_product(SparseVec<double> &instance)
+    {
+        double value = 0.0;
+        // two pointer, need sorted
+        uint32_t i = 0, j = 0;
+        while ( i < _length && j < instance.length() )
+        {
+            if (_atoms[i].idx == instance[j].idx )
+            {
+                value += _atoms[i].value * instance[j].value;
+            }
+            else if (_atoms[i].idx < instance[j].idx)
+            {
+                ++i;
+            }
+            else if (_atoms[i].idx > instance[j].idx)
+            {
+                ++j;
+            }
+        }
+        return value;
+    }
+};
+
+template <class T>
+class SparseMatrix
+{
+private:
+    SparseVec <T> * _vecs;
+    uint32_t _rows;
+    uint32_t _columns;
+
+public:
+    SparseMatrix() : _vecs(NULL), _rows(0), _columns(0) { }
+
+    ~SparseMatrix()
+    {
+        DEL_ARRAY_POINTER(_vecs);
+    }
+
+    uint32_t columns() { return _columns; }
+    int set_columns(uint32_t columns) { _columns = columns; return 0; } 
+    uint32_t rows() {return _rows; }
+    int set_rows(uint32_t rows) { _rows = rows; return 0; }
+    int set_size(uint32_t rows);
+
+    // NOTICE: the Inverse of SparseMatrix may be not SPARSE, so be careful
+    int inverse(SparseMatrix &inver);
+
+    SparseVec<T>& operator[] (uint32_t i)
+    {
+        if (i >= 0 && i < _rows)
+        {
+            return _vecs[i];
+        }
+        else
+        {
+            printf("operator [%u] for SparseMatrix failed, total size %u\n", i, _rows);
+            return _vecs[0];
+        }
     }
 };
 
@@ -341,6 +385,7 @@ public:
     {
         return _matrix.columns();
     }
+
 };
 
 template<>

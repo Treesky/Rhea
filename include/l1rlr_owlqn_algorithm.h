@@ -10,6 +10,8 @@
 #define _L1RLR_OWLQN_ALGORITHM_
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <limits>
 #include <deque>
 
@@ -28,6 +30,7 @@ private:
     std::deque< DenseVec<double>* > _ys;
     std::deque< DenseVec<double>* > _ss;
     std::deque<double> _rhos;
+    std::deque<double> _pre_vals;
     double * _alphas;
     DenseVec<double> _dir;
     DenseVec<double> _steepest_dir;
@@ -42,20 +45,25 @@ private:
     double _prev_val;
     uint32_t _line_search_steps;
     double _l1weight;
+    double _l2weight;
 
     int newton_direction();
     int orthant_projection();
-    bool check_convergence();
-    bool check_direction();
+    double check_direction();
+    bool check_con_convergence();
+    bool check_avg_convergence();
+
     int shift_xk_xk1();
+    int l1_direction();
 
 public:
     virtual double predict(Vec<double> &ins);
     virtual int init();
     virtual int save_model(std::string filename);
     virtual int load_model(std::string filename);
+    int lr_func_val(DenseVec<double> &w, double &func_val, DenseVec<double> &gradient); 
     L1rlrOwlqnAlgorithm();
-    ~L1rlrOwlqnAlgorithm() {};
+    ~L1rlrOwlqnAlgorithm();
     virtual int train();
 };
 
