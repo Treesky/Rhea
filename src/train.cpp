@@ -11,6 +11,7 @@
 #include "l1rlr_owlqn_algorithm.h"
 #include "util.h"
 #include "evaluator.h"
+#include "auc_onepass_algorithm.h"
 
 using namespace Rhea;
 
@@ -24,9 +25,9 @@ void exit_with_help()
     printf("%s\n", "        l2rlr_sgd (sgd for l2r-lr)");
     printf("%s\n", "        l2r_newton (newton method for l2r-lr)");
     printf("%s\n", "        l2rlr_auto-regular-sgd (auto regular-sgd for l2r-lr)");
-    printf("%s\n", "        l1rlr-cdn (cdn for l1r-lr)");
-    printf("%s\n", "        l1rlr-glmnet (glmnet for l1r-lr)");
-    printf("%s\n", "        auc-sgd ( for auc-optim)");
+    printf("%s\n", "        l1rlr_cdn (cdn for l1r-lr)");
+    printf("%s\n", "        l1rlr_glmnet (glmnet for l1r-lr)");
+    printf("%s\n", "        one_pass_auc_sgd ( for one-pass-auc-optim)");
 }
 
 int main(int argc, char **argv)
@@ -66,6 +67,20 @@ int main(int argc, char **argv)
         std::cout << "AUC Evaluation: " << auc_eval.evaluate(owlqn_algo, *dt) << std::endl;
         MaeEvaluator mae_eval;
         std::cout << "Mae Evaluation: " << mae_eval.evaluate(owlqn_algo, *dt) << std::endl;
+    }
+    else if ( 0 == strcmp(prob_type, "one_pass_auc_sgd") )
+    {
+        SparseData<double> * dt = new SparseData<double>();
+        dt->load_from_txt("heart_scale");
+        Rhea::AucOnepassAlgorithm auc_algo;
+        auc_algo.set_data(dt);
+        auc_algo.init();
+        auc_algo.train();
+        auc_algo.save_model("auc.model.out");
+        AucEvaluator auc_eval;
+        std::cout << "AUC Evaluation: " << auc_eval.evaluate(auc_algo, *dt) << std::endl;
+        MaeEvaluator mae_eval;
+        std::cout << "Mae Evaluation: " << mae_eval.evaluate(auc_algo, *dt) << std::endl;
     }
     else
     {
